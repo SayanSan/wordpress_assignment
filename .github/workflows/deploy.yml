@@ -36,6 +36,7 @@ jobs:
           port: "22"
           username: "ubuntu"
           key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "."  # Source directory or files to transfer
-          target: "/var/www/html/" 
+          source: "."
+          target: "/var/www/html/"
+          debug: true
 
