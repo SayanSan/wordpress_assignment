@@ -34,7 +34,7 @@ jobs:
         with:
           host: "3.110.127.12"
           username: "ubuntu"
-          key: ${{ mysecrets.SERVER_SSH_KEY }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
           source: "."  # Source directory or files to transfer
           target: "/var/www/html/" 
 
