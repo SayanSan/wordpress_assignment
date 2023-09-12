@@ -31,6 +31,8 @@ jobs:
 
       - name: Upload Files to Server
         uses: appleboy/scp-action@master
+        run: |
+          ssh -i "key_pair_2.pem" ubuntu@ec2-3-110-127-12.ap-south-1.compute.amazonaws.com
         with:
           host: "3.110.127.12"
           port: 22
