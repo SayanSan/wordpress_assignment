@@ -36,5 +36,5 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "."  # Source directory or files to transfer
-          target: "/path/to/your/remote/directory"  # Target directory on the server
+          target: "/var/www/html/" 
 
