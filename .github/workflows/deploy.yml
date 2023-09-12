@@ -30,13 +30,5 @@ jobs:
           sudo rm -rf wordpress
 
       - name: Upload Files to Server
-        uses: wftp-upload-action/sftp-action@v0.1.4
-        with:
-          host: "3.110.127.12"
-          port: "22"
-          username: "ubuntu"
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "."
-          target: "/var/www/html/"
-          debug: true
-
+        run: |
+          rsync -e "ssh -i ${{ secrets.SERVER_SSH_KEY }}" -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='build/' ./ ubuntu@3.110.127.12:/var/www/html/
