@@ -22,12 +22,12 @@ jobs:
 
       - name: Build Project
         run: |
-          wget https://wordpress.org/latest.tar.gz
-          tar -xzvf latest.tar.gz
-          mv wordpress/* /var/www/html/ 
-          cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-          rm latest.tar.gz
-          rm -r wordpress
+          sudo wget https://wordpress.org/latest.tar.gz
+          sudo tar -xzvf latest.tar.gz
+          sudo mv wordpress/* /var/www/html/ 
+          sudo cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
+          sudo rm latest.tar.gz
+          sudo rm -r wordpress
 
       - name: Upload Files to Server
         uses: appleboy/scp-action@master
