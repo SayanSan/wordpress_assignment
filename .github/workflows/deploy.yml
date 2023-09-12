@@ -32,8 +32,8 @@ jobs:
       - name: Upload Files to Server
         uses: appleboy/scp-action@master
         with:
-          host: 3.110.127.12
-          username: ubuntu
+          host: "3.110.127.12"
+          username: "ubuntu"
           key: ${{ secrets.SERVER_SSH_KEY }}
           source: "."  # Source directory or files to transfer
           target: "/var/www/html/" 
