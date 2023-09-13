@@ -24,5 +24,5 @@ jobs:
       - name: SSH into EC2 and Make Changes
         run: |
           ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-110-127-12.ap-south-1.compute.amazonaws.com 
-          env:
-            SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
