@@ -1,4 +1,4 @@
-name: WordPress Deployment
+name: SSH Deploy
 
 on:
   push:
@@ -7,14 +7,13 @@ on:
 
 jobs:
   deploy:
-    name: Deploy WordPress
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Install SSH Key
+      - name: Set up SSH Key
         run: |
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
@@ -22,18 +21,8 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Set up SSH Agent and Add SSH Key
+      - name: SSH into EC2 and Make Changes
         run: |
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_rsa
+          ssh -i "key_pair_2.pem" ubuntu@ec2-3-110-127-12.ap-south-1.compute.amazonaws.com "cd /etc/nginx/.git && git pull origin main"
         env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-          
-      - name: Deploy WordPress via SSH
-        run: |
-          ssh -o StrictHostKeyChecking=no -A ubuntu@ip-172-31-33-129 << EOF
-            cd /var/www/wordpress
-            git pull origin master
-            sudo service php8.1-fpm restart
-            sudo service nginx restart
-          EOF
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
