@@ -32,12 +32,9 @@ jobs:
 
       - name: Deploy WordPress via SSH
         run: |
-          ssh -o StrictHostKeyChecking=no -A user@your-server-ip-address << EOF
-            cd /path/to/wordpress/directory
+          ssh -o StrictHostKeyChecking=no -A ubuntu@ip-172-31-33-129 << EOF
+            cd /var/www/wordpress
             git pull origin master
-            composer install # If using Composer for WordPress
-            # Any other deployment steps (e.g., database migrations)
-            # Restart PHP and Nginx
             sudo service php8.1-fpm restart
             sudo service nginx restart
           EOF
