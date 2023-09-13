@@ -23,6 +23,6 @@ jobs:
 
       - name: SSH into EC2 and Make Changes
         run: |
-          ssh -i "key_pair_2.pem" ubuntu@ec2-3-110-127-12.ap-south-1.compute.amazonaws.com "cd /etc/nginx/.git && git pull origin main"
+          ssh -i ~/.ssh/id_rsa ubuntu@ec2-3-110-127-12.ap-south-1.compute.amazonaws.com "cd /etc/nginx/.git && git pull origin main"
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
