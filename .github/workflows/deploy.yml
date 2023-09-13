@@ -22,14 +22,13 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Set up SSH Agent
-        run: eval $(ssh-agent -s)
+      - name: Set up SSH Agent and Add SSH Key
+        run: |
+          eval $(ssh-agent -s)
+          ssh-add ~/.ssh/id_rsa
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
-
-      - name: Add SSH Key to Agent
-        run: ssh-add ~/.ssh/id_rsa
-
+          
       - name: Deploy WordPress via SSH
         run: |
           ssh -o StrictHostKeyChecking=no -A ubuntu@ip-172-31-33-129 << EOF
