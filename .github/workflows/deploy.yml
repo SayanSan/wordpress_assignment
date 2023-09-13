@@ -1,34 +1,43 @@
-name: Deploy to Server
+name: WordPress Deployment
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
+    name: Deploy WordPress
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Install Dependencies
+      - name: Install SSH Key
         run: |
-          sudo apt update
-          sudo apt install -y php-curl php-dom php-mbstring php-imagick php-zip php-gd
-          sudo apt install -y nginx
-          sudo apt install -y php-fpm
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Build Project
-        run: |
-          sudo wget https://wordpress.org/latest.tar.gz
-          sudo tar -xzvf latest.tar.gz
-          sudo cp -r wordpress/* /var/www/html/ 
-          sudo cp /var/www/html/wp-config-sample.php /var/www/html/wp-config.php
-          sudo rm latest.tar.gz
-          sudo rm -rf wordpress
+      - name: Set up SSH Agent
+        run: eval $(ssh-agent -s)
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 
-      - name: Upload Files to Server
+      - name: Add SSH Key to Agent
+        run: ssh-add ~/.ssh/id_rsa
+
+      - name: Deploy WordPress via SSH
         run: |
-          rsync -e "ssh -i ${{ secrets.SERVER_SSH_KEY }}" -avz --exclude='.git/' --exclude='.github/' --exclude='node_modules/' --exclude='build/' ./ ubuntu@3.110.127.12:/var/www/html/
+          ssh -o StrictHostKeyChecking=no -A user@your-server-ip-address << EOF
+            cd /path/to/wordpress/directory
+            git pull origin master
+            composer install # If using Composer for WordPress
+            # Any other deployment steps (e.g., database migrations)
+            # Restart PHP and Nginx
+            sudo service php8.1-fpm restart
+            sudo service nginx restart
+          EOF
