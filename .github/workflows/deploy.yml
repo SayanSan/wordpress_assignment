@@ -1,70 +1,26 @@
-name: Build The Theme & Deploy
+name: Deploy
 
 on:
   push:
     branches:
       - master
 
-defaults:
-  run:
-    working-directory: themes/my-theme
-
 jobs:
-  run-github-action:
+  update-nginx:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Get npm cache directory
-        id: npm-cache-dir
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install SSH Key
         run: |
-          echo "::set-output name=dir::$(npm config get cache)"
-      - uses: actions/cache@v3
-        id: npm-cache
-        with:
-          path: ${{ steps.npm-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-      - name: ADD NODE JS v12.x
-        uses: actions/setup-node@v2
-        with:
-          node-version: "12.x"
-      - name: ADD PHP v 8.1.x
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.1"
-          tools: composer:v2
-      - name: RUN NPM
-        run: npm ci
-      - name: RUN COMPOSER
-        run: composer install
-      - name: BUILD THEME
-        run: npm run prod
-      - name: Before Deployment
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.USER_NAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            sudo rm -rf /var/www/html/wp/wp-content/themes/my-theme/*
-            sudo chown -R ubuntu /var/www/html/wp/wp-content/themes/
-      - name: Deploy to AWS Server
-        uses: easingthemes/ssh-deploy@main
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.SSH_HOST }}
-          REMOTE_USER: ${{ secrets.USER_NAME }}
-          SOURCE: "themes/my-theme/"
-          TARGET: "/var/www/html/wp/wp-content/themes/my-theme/"
-          EXCLUDE: "/node_modules/"
-      - name: After Deployment
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.USER_NAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.PORT }}
-          script: |
-            sudo chown -R www-data:www-data /var/www/html/wp/wp-content/themes/
+
+      - name: Update Nginx Directory
+        run: |
+          scp -i ~/.ssh/id_rsa -r ./path/to/your/code/* ubuntu@ip-172-31-33-129.ap-south-1.compute.internal:/var/nginx/
