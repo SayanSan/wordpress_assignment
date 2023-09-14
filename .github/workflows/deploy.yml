@@ -23,5 +23,5 @@ jobs:
 
       - name: Update Nginx Directory
         run: |
-          scp -i ~/.ssh/id_rsa.pub -r ./ ubuntu@ec2-3-110-127-12.ap-south-1.compute.amazonaws.com:/etc/nginx/
+          scp -i ~/.ssh/github-actions -r ./ ubuntu@ec2-3-110-127-12.ap-south-1.compute.amazonaws.com:/etc/nginx/
 
