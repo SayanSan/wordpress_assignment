@@ -1,42 +1,70 @@
-name: deploy
+name: Build The Theme & Deploy
+
 on:
   push:
     branches:
-      - main
       - master
+
+defaults:
+  run:
+    working-directory: themes/my-theme
+
 jobs:
-  build-and-deploy:
+  run-github-action:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-
-      - run: npm install
-      - run: npm run build
-
-      - name: Install SSH Key
-        uses: shimataro/ssh-key-action@v2
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v3
+        id: npm-cache
         with:
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          known_hosts: unnecessary
-
-      - name: Adding Known Hosts
-        run: ssh-keyscan -p ${{ secrets.SSH_PORT }} -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-
-      - name: Deploy with rsync
-        run: rsync -avz -e "ssh -p ${{ secrets.SSH_PORT }}" ./dist/ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/etc/nginx/wordpress
-
-      - name: Restart Server
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: ADD NODE JS v12.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: "12.x"
+      - name: ADD PHP v 8.1.x
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.1"
+          tools: composer:v2
+      - name: RUN NPM
+        run: npm ci
+      - name: RUN COMPOSER
+        run: composer install
+      - name: BUILD THEME
+        run: npm run prod
+      - name: Before Deployment
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          username: ${{ secrets.USER_NAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
+          port: ${{ secrets.PORT }}
           script: |
-            cd /PATH_TO_FOLDER
-            git fetch origin master
-            git reset --hard FETCH_HEAD
-            git clean -d -f --exclude secrets
-            npm install --production
-            npm run restart
+            sudo rm -rf /var/www/html/wp/wp-content/themes/my-theme/*
+            sudo chown -R ubuntu /var/www/html/wp/wp-content/themes/
+      - name: Deploy to AWS Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.USER_NAME }}
+          SOURCE: "themes/my-theme/"
+          TARGET: "/var/www/html/wp/wp-content/themes/my-theme/"
+          EXCLUDE: "/node_modules/"
+      - name: After Deployment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.USER_NAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            sudo chown -R www-data:www-data /var/www/html/wp/wp-content/themes/
