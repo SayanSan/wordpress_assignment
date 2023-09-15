@@ -129,6 +129,7 @@ lost connection
 Error: Process completed with exit code 1.
 
 I feel bad :( 
+P.S: I think the SSH_PRIVATE_KEY is not working. Or maybe I wrote wrong code. 
 
 The code that is now in the deploy.yml is the last variation, I tried a lot but I'm missing something here. 
 
