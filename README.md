@@ -99,16 +99,44 @@ Lastly I included them in my website config file. See wordpress.conf
 
 ================================================================================================================================================================================================================================================
 
+For setting up github, I first downloaded git in the system.
+To do that run the commands:
 
-For the CI/CD part, honestly I need help in it. I overthought the process and confused myself. I tried 3 different veriations and none of them worked. I feel bad :( 
+sudo apt update
+sudo apt install git
+git --version
 
-The code that is now in the deploy.yml is the last variation, I tried alot but I'm missing something here. 
+Now you need to set up a repository. I went to the /etc/nginx directory as it has almost all the necessary files and created a repository there. You also need to generate a Personal access token and store it as you will need it in the future.
+Generate a Personal access token:
+Profile setting => Developer settings => Personal access token => Token classic
+
+Comeback to your EC2, in the /etc/nginx simply run:
+
+Git init    #if it gives Permission denied error run with sudo
+git config --global user.name "Your Name"
+git config --global user.email "your_email@example.com"
+git clone git@github.com:username/repo.git
+
+sudo git add <all the files you need in the directoy>
+git commit -m "massage"
+sudo git push origin master      #your repositories default branch or any branch you want to upload
+
+
+For the CI/CD part, honestly, I need help with it. I overthought the process and confused myself. I tried 3 different variations and none of them worked. I have stored the secrets and all but it keeps throwing me 
+
+Host key verification failed.
+lost connection
+Error: Process completed with exit code 1.
+
+I feel bad :( 
+
+The code that is now in the deploy.yml is the last variation, I tried a lot but I'm missing something here. 
 
 Truth is I would love to know and learn what I did wrong and correct it. If you can help me that would be the best. 
 
 ===================================================================================================================================================================================================================================================
 
-Thank you so much for the opputunity and I hope i'll hear for you soon. 
+Thank you so much for the opportunity and I hope I'll hear from you soon. 
 
 Peace out !! Sayan
 
